@@ -5,12 +5,12 @@
 
 namespace Completionist\Vanity\Card;
 
-use Exception;
-use Imagine\Gd\Image;
-use Imagine\Gd\Imagine;
 use Completionist\Vanity\Card\Layout\AStatsRetro;
 use Completionist\Vanity\Card\Layout\Classic;
 use Completionist\Vanity\Card\Layout\Layout;
+use Exception;
+use Imagine\Gd\Image;
+use Imagine\Gd\Imagine;
 
 class Card
 {
@@ -122,14 +122,19 @@ class Card
     }
 
     /**
-     * @param String     $layoutType
-     * @param null|array $layoutOptions
-     * @param null|array $data
+     * @param String|Layout $layout
+     * @param null|array    $layoutOptions
+     * @param null|array    $data
      * @return $this
      */
-    public function layout($layoutType, $layoutOptions = null, $data = null)
+    public function layout($layout, $layoutOptions = null, $data = null)
     {
-        $this->layoutType = $layoutType;
+        if(is_a($layout, 'Completionist\Vanity\Card\Layout\Layout')) {
+            $this->layout = $layout;
+            $this->layoutType = $layout->id();
+        } else {
+            $this->layoutType = $layout;
+        }
         if ($layoutOptions) {
             $this->layoutOptions = $layoutOptions;
         }
@@ -187,6 +192,11 @@ class Card
         $this->card()->show($this->format);
     }
 
+    public function base64()
+    {
+        return base64_encode($this->card()->get($this->format));
+    }
+
     /**
      * @throws Exception
      */
@@ -229,15 +239,15 @@ class Card
      */
     private function drawLayout()
     {
-        switch ($this->layoutType) {
-            case 'retro':
-                $this->layout = new AStatsRetro($this);
-                break;
-            case 'classic':
-            default:
-                $this->layout = new Classic($this);
-                break;
+        if (is_null($this->layout)) {
+            switch ($this->layoutType) {
+                case 'classic':
+                default:
+                    $this->layout = new Classic;
+                    break;
+            }
         }
+        $this->layout->card($this);
         $this->layout->fonts($this->fontPath);
         return $this->layout->draw();
     }

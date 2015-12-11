@@ -25,6 +25,7 @@ class Layout
     protected $textColor;
     protected $textHighlightColor;
     protected $fontName;
+    protected $fontNameBold;
     protected $fontSize;
     protected $schemeColor;
 
@@ -42,12 +43,9 @@ class Layout
 
     /**
      * Layout constructor.
-     *
-     * @param Card $card
      */
-    public function __construct(Card $card)
+    public function __construct()
     {
-        $this->card = $card;
         $this->imagine = new Imagine;
         $this->image =
             $this->imagine->create(new Box($this->width, $this->height), $this->color($this->backgroundColor));
@@ -59,6 +57,14 @@ class Layout
     public function id()
     {
         return $this->id;
+    }
+
+    /**
+     * @param Card $card
+     */
+    public function card(Card $card)
+    {
+        $this->card = $card;
     }
 
     /**
@@ -339,11 +345,11 @@ class Layout
                     $text = isset($element['text']) ? $element['text'] : $text;
 
                     if ($text) {
-                        $boundaries = $this->textBoundaries($text, $this->fontSize + 2, 'MyriadPro-Bold.otf');
+                        $boundaries = $this->textBoundaries($text, $this->fontSize + 2, $this->fontNameBold);
                         if ($boundaries[2] + $offsetX <= $size->getWidth()) {
                             $this->addText(
                                 $area, $text, $offsetX, 9, $this->fontSize + 2, $this->textHighlightColor,
-                                'MyriadPro-Bold.otf'
+                                $this->fontNameBold
                             );
                             $offsetX += $boundaries[2] + $margin;
                         }

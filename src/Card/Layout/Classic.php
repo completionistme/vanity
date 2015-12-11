@@ -12,6 +12,9 @@ use Imagine\Image\Point;
 class Classic extends Layout
 {
     protected $id = 'classic';
+
+    // TODO: add settings below as layout options
+
     protected $width = 400;
     protected $height = 116;
     protected $border = 1;
@@ -20,6 +23,7 @@ class Classic extends Layout
     protected $textColor = 'CCC';
     protected $textHighlightColor = 'FFFFFF';
     protected $fontName = 'MyriadPro-Semibold.otf';
+    protected $fontNameBold = 'MyriadPro-Bold.otf';
     protected $fontSize = 8;
     protected $schemeColor = '4F4F57';
     //protected $schemeColor = '156';
