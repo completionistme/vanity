@@ -1,17 +1,15 @@
 {
     "name": "completionist/vanity",
 
-    "description": "Completionist Vanity",
+    "description": "Completionist Vanity Gamercards",
+
+    "type": "library",
 
     "keywords": [
-
-        "laravel",
         "completionist",
-        "api",
-        "client",
+        "vanity",
+        "gamercard",
         "steam",
-        "psn",
-        "xbox",
         "profile",
         "games",
         "gamer",
@@ -21,23 +19,24 @@
         "achievements"
     ],
 
+    "license": "MIT",
+
+    "homepage": "http://completionist.me/",
+
     "authors": [
         {
-            "name": "luchaos",
+            "name": "Lucas Seinfeld (luchaos)",
             "email": "lcs@luchaos.at"
         }
     ],
 
     "require": {
-
         "php": ">=5.4.0",
-        "illuminate/support": "4.2.*"
+        "imagine/imagine": "^0.6.3"
     },
 
     "autoload": {
-
-        "psr-0": {
-            
+        "psr-4": {
             "Completionist\\Vanity\\": "src/"
         }
     },
