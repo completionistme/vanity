@@ -1,1 +1,1 @@
-# Completionist Vanity Gamercards
+# Completionist Vanity Cards

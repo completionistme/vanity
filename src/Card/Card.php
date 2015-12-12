@@ -175,7 +175,14 @@ class Card
     public function option($option)
     {
         if (!is_null($this->layoutOptions) && is_string($option)) {
-            return $this->resolveDotNotation($this->layoutOptions, $option);
+            $option = $this->resolveDotNotation($this->layoutOptions, $option);
+            if($option === 'false'){
+                return false;
+            }
+            if($option === 'true'){
+                return true;
+            }
+            return $option;
         }
     }
 

@@ -230,9 +230,9 @@ class Layout
         $sHeight = $background->getSize()->getHeight();
         $size = new Box($this->width, $this->height);
 
-        $blur = $this->card->option('background.blur');
-        $darken = $this->card->option('background.darken');
-        $colorize = $this->card->option('background.colorize');
+        $blur = $this->option('background.blur');
+        $darken = $this->option('background.darken');
+        $colorize = $this->option('background.colorize');
 
         if ($darken || $colorize) {
             $background->effects()->gamma(1.2);
@@ -240,19 +240,19 @@ class Layout
         if ($blur) {
             $background->effects()->blur();
         }
-        $verticalAlign = $this->card->option('background.vertical');
+        $verticalAlign = $this->option('background.vertical');
         switch ($verticalAlign) {
             case 'bottom':
                 $background->crop(new Point(0, (int)(($sHeight - $this->height))), $size);
                 break;
             case 'lowercenter':
-                $background->crop(new Point(0, (int)(($sHeight - $this->height) / 3)), $size);
+                $background->crop(new Point(0, (int)(($sHeight - $this->height) / 3 * 2)), $size);
                 break;
             case 'center':
                 $background->crop(new Point(0, (int)(($sHeight - $this->height) / 2)), $size);
                 break;
             case 'uppercenter':
-                $background->crop(new Point(0, (int)(($sHeight - $this->height) / 3 * 2)), $size);
+                $background->crop(new Point(0, (int)(($sHeight - $this->height) / 3)), $size);
                 break;
             case 'top':
                 // default
@@ -401,10 +401,15 @@ class Layout
 
     /**
      * @param Image $area
-     * @param       $items
+     * @param array $items
+     * @param int   $rows
      */
-    protected function imagesGrid($area, $items, $rows)
+    protected function imagesGrid(Image $area, array $items, $rows)
     {
+        if (!count($items)) {
+            return;
+        }
+
         $borderSize = isset($items[0]['color']) ? 1 : 0;
         $margin = 2;
 

@@ -1,21 +1,22 @@
 {
     "name": "completionist/vanity",
 
-    "description": "Completionist Vanity Gamercards",
+    "description": "Completionist Vanity Cards",
 
     "type": "library",
 
     "keywords": [
         "completionist",
         "vanity",
-        "gamercard",
-        "steam",
+        "card",
         "profile",
         "games",
         "gamer",
         "gamercard",
+        "profilecard",
         "trophycard",
         "tophies",
+        "steam",
         "achievements"
     ],
 

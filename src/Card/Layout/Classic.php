@@ -48,75 +48,93 @@ class Classic extends Layout
         // == top right elements
 
         $area = $this->renderArea(new Box($this->width, $this->topAreaHeight), 'areas.top.right');
-        $this->image->paste($area, new Point($this->width - $area->getSize()->getWidth() - $this->border, $this->border));
+        $this->image->paste(
+            $area, new Point($this->width - $area->getSize()->getWidth() - $this->border, $this->border)
+        );
 
         // == bottom left elements
 
         $area = $this->renderArea(new Box($this->width, $this->bottomAreaHeight), 'areas.bottom.left');
-        $this->image->paste($area, new Point($this->border, $this->height - $area->getSize()->getHeight() - $this->border));
+        $this->image->paste(
+            $area, new Point($this->border, $this->height - $area->getSize()->getHeight() - $this->border)
+        );
 
         // == bottom right elements
 
         $area = $this->renderArea(new Box($this->width, $this->bottomAreaHeight), 'areas.bottom.right');
         $this->image->paste(
-            $area, new Point($this->width - $area->getSize()->getWidth() - $this->border, $this->height - $area->getSize()->getHeight() - $this->border)
+            $area, new Point(
+                $this->width - $area->getSize()->getWidth() - $this->border,
+                $this->height - $area->getSize()->getHeight() - $this->border
+            )
         );
 
         // == center elements
 
         $columns = $this->option('areas.center');
-        $minGutterWidth = 0;
-        $gridColumnWidth = (int)($this->width / count($columns) - $minGutterWidth / (count($columns) - 1));
-        for ($i = 0; $i < count($columns); $i++) {
-            $elements = $columns[$i];
-            if (!empty($elements)) {
-                foreach ($elements as $element) {
-                    $items = isset($element['data']) ? $this->data($element['data']) : null;
-                    $items = isset($element['items']) ? $element['items'] : $items;
-                    $span = isset($element['span']) ? $element['span'] : 1;
-                    $rows = isset($element['rows']) ? $element['rows'] : 1;
-                    $vertical = isset($element['vertical']) ? $element['vertical'] : null;
-                    $align = isset($element['align']) ? $element['align'] : null;
-                    if (!empty($items)) {
-                        $availableHeight = $this->height - $this->topAreaHeight - $this->bottomAreaHeight;
-                        $area = $this->createArea(new Box($gridColumnWidth * $span, $availableHeight));
-                        $this->imagesGrid($area, $items, $rows);
-                        switch ($align) {
-                            case 'left':
-                                $posX = $i * $gridColumnWidth + $this->padding;
-                                break;
-                            case 'right':
-                                $posX = $i * $gridColumnWidth + $gridColumnWidth * $span - $area->getSize()->getWidth()
-                                    - $this->padding;
-                                break;
-                            case 'center':
-                                // default
-                            default:
-                                $posX = $i * $gridColumnWidth + (int)(($gridColumnWidth * $span - $area->getSize()
-                                                ->getWidth()) / 2);
-                                break;
+        if (count($columns) > 0) {
+            $minGutterWidth = 0;
+            $gridColumnWidth = (int)($this->width / count($columns));
+            if (count($columns) > 1) {
+                $gridColumnWidth -= (int)($minGutterWidth / (count($columns) - 1));
+            }
+
+            $colCount = 0;
+            foreach ($columns as $elements) {
+                if (!empty($elements)) {
+                    foreach ($elements as $element) {
+                        $items = isset($element['data']) ? $this->data($element['data']) : null;
+                        $items = isset($element['items']) ? $element['items'] : $items;
+                        $span = isset($element['span']) ? $element['span'] : 1;
+                        $rows = isset($element['rows']) ? $element['rows'] : 1;
+                        $vertical = isset($element['vertical']) ? $element['vertical'] : null;
+                        $align = isset($element['align']) ? $element['align'] : null;
+                        if (!empty($items)) {
+                            $availableHeight = $this->height - $this->topAreaHeight - $this->bottomAreaHeight;
+                            $area = $this->createArea(new Box($gridColumnWidth * $span, $availableHeight));
+                            $this->imagesGrid($area, $items, $rows);
+                            switch ($align) {
+                                case 'left':
+                                    $posX = $colCount * $gridColumnWidth + $this->padding;
+                                    break;
+                                case 'right':
+                                    $posX =
+                                        $colCount * $gridColumnWidth + $gridColumnWidth * $span - $area->getSize()
+                                            ->getWidth()
+                                        - $this->padding;
+                                    break;
+                                case 'center':
+                                    // default
+                                default:
+                                    $posX =
+                                        $colCount * $gridColumnWidth + (int)(($gridColumnWidth * $span - $area->getSize(
+                                                )
+                                                    ->getWidth()) / 2);
+                                    break;
+                            }
+                            switch ($vertical) {
+                                case 'top':
+                                    $posY = $this->topAreaHeight + $this->padding - 1;
+                                    break;
+                                case 'bottom':
+                                    $posY = $this->topAreaHeight + $availableHeight - $area->getSize()->getHeight()
+                                        - $this->padding;
+                                    break;
+                                case 'center':
+                                    // default
+                                default:
+                                    $posY =
+                                        $this->topAreaHeight + (int)(($availableHeight - $area->getSize()->getHeight())
+                                            / 2);
+                                    break;
+                            }
+                            $this->image->paste($area, new Point($posX, $posY));
                         }
-                        switch ($vertical) {
-                            case 'top':
-                                $posY = $this->topAreaHeight + $this->padding - 1;
-                                break;
-                            case 'bottom':
-                                $posY = $this->topAreaHeight + $availableHeight - $area->getSize()->getHeight()
-                                    - $this->padding;
-                                break;
-                            case 'center':
-                                // default
-                            default:
-                                $posY = $this->topAreaHeight + (int)(($availableHeight - $area->getSize()->getHeight())
-                                        / 2);
-                                break;
-                        }
-                        $this->image->paste($area, new Point($posX, $posY));
                     }
                 }
+                $colCount++;
             }
         }
-
         return $this->image;
     }
 
@@ -144,8 +162,8 @@ class Classic extends Layout
      * @param int $y
      * @param int $size
      */
-    protected function addSteamLevel($x, $y, $size = 32)
-    {
+    protected function addSteamLevel($x, $y, $size = 32
+    ) {
         $this->image->draw()->ellipse(new Point($x, $y), new Box($size, $size), $this->color('fff'));
     }
 }
