@@ -406,7 +406,7 @@ class Layout
      */
     protected function imagesGrid(Image $area, array $items, $rows)
     {
-        if (!count($items)) {
+        if (!count($items) || !isset($items[0]) || !isset($items[0]['image'])) {
             return;
         }
 

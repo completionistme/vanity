@@ -85,8 +85,8 @@ class Classic extends Layout
                     foreach ($elements as $element) {
                         $items = isset($element['data']) ? $this->data($element['data']) : null;
                         $items = isset($element['items']) ? $element['items'] : $items;
-                        $span = isset($element['span']) ? $element['span'] : 1;
-                        $rows = isset($element['rows']) ? $element['rows'] : 1;
+                        $span = isset($element['span']) && !empty($element['span']) ? $element['span'] : 1;
+                        $rows = isset($element['rows']) && !empty($element['rows']) ? $element['rows'] : 1;
                         $vertical = isset($element['vertical']) ? $element['vertical'] : null;
                         $align = isset($element['align']) ? $element['align'] : null;
                         if (!empty($items)) {
