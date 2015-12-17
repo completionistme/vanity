@@ -20,9 +20,11 @@ class Classic extends Layout
     protected $border = 1;
     protected $padding = 4;
     protected $backgroundColor = '000000';
+    protected $textColorMuted = '999';
     protected $textColor = 'CCC';
-    protected $textHighlightColor = 'FFFFFF';
-    protected $fontName = 'MyriadPro-Semibold.otf';
+    protected $textColorHighlight = 'FFFFFF';
+    protected $fontNameThin = 'MyriadPro-Regular.otf';
+    protected $fontName = 'MyriadPro-Bold.otf';
     protected $fontNameBold = 'MyriadPro-Bold.otf';
     protected $fontSize = 8;
     protected $schemeColor = '4F4F57';
