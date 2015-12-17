@@ -138,6 +138,14 @@ class Card
         if ($layoutOptions) {
             $this->layoutOptions = $layoutOptions;
         }
+        if (is_null($this->layout)) {
+            switch ($this->layoutType) {
+                case 'classic':
+                default:
+                    $this->layout = new Classic;
+                    break;
+            }
+        }
         if ($data) {
             $this->data = $data;
         }
@@ -229,15 +237,17 @@ class Card
     {
         $this->imagine = new Imagine();
 
-        if ($this->cacheLifetime && $this->cacheLifetime > 0
-            && file_exists($this->imagePath())
-            && time() - filemtime($this->imagePath()) < $this->cacheLifetime
+        $imagePath = $this->imagePath($this->addSuffix ? $this->layout->id() : null);
+
+        if (!empty($this->cacheLifetime)
+            && file_exists($imagePath)
+            && (time() - filemtime($imagePath) <= $this->cacheLifetime)
         ) {
             // cached card image
-            return $this->imagine->open($this->imagePath());
+            return $this->imagine->open($imagePath);
         } else {
             // fresh card image
-            return $this->drawLayout()->save($this->imagePath($this->addSuffix ? $this->layout->id() : null));
+            return $this->drawLayout()->save($imagePath);
         }
     }
 
@@ -246,14 +256,6 @@ class Card
      */
     private function drawLayout()
     {
-        if (is_null($this->layout)) {
-            switch ($this->layoutType) {
-                case 'classic':
-                default:
-                    $this->layout = new Classic;
-                    break;
-            }
-        }
         $this->layout->card($this);
         $this->layout->fonts($this->fontPath);
         return $this->layout->draw();
