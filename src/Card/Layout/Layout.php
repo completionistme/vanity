@@ -223,8 +223,9 @@ class Layout
 
     protected function addBackground()
     {
-        $backgroundUrl = $this->option('background.value');
-        $backgroundUrl = $backgroundUrl ? $backgroundUrl : $this->data('background');
+        //$backgroundUrl = $this->option('background.value');
+        //$backgroundUrl = $backgroundUrl ? $backgroundUrl : $this->data('background');
+        $backgroundUrl = $this->data('background');
         $background = $this->imagine->open($backgroundUrl);
         $sWidth = $background->getSize()->getWidth();
         $sHeight = $background->getSize()->getHeight();
@@ -323,7 +324,8 @@ class Layout
 
                 case 'avatar':
                     $imageSize = $size->getHeight() - $marginSmall;
-                    $imageUrl = isset($element['value']) ? $element['value'] : null;
+                    $imageUrl = null;
+                    //$imageUrl = isset($element['value']) ? $element['value'] : $imageUrl;
                     $imageUrl = isset($element['data']) ? $this->data($element['data']) : $imageUrl;
                     if ($imageUrl) {
                         $this->addImage(
@@ -336,7 +338,8 @@ class Layout
 
                 case 'image':
                     $imageSize = $size->getHeight() - $this->padding * 2;
-                    $imageUrl = isset($element['value']) ? $element['value'] : null;
+                    $imageUrl = null;
+                    //$imageUrl = isset($element['value']) ? $element['value'] : $imageUrl;
                     $imageUrl = isset($element['data']) ? $this->data($element['data']) : $imageUrl;
                     if ($imageUrl) {
                         $this->addImage(
@@ -349,14 +352,16 @@ class Layout
                 case 'username':
                     $y = (int)(($size->getHeight() - $this->fontSize) / 2);
 
-                    $text = isset($element['data']) ? $this->data($element['data']) : null;
-                    $text = isset($element['value']) ? $element['value'] : $text;
+                    $text = null;
+                    $text = isset($element['data']) ? $this->data($element['data']) : $text;
+                    //$text = isset($element['value']) ? $element['value'] : $text;
+                    $color = isset($element['color']) ? $element['color'] : $this->textColorHighlight;
 
                     if ($text) {
                         $boundaries = $this->textBoundaries($text, $this->fontSize + 2, $this->fontNameBold);
                         if ($boundaries[2] + $offsetX <= $size->getWidth()) {
                             $this->addText(
-                                $area, $text, $offsetX, 9, $this->fontSize + 2, $this->textColorHighlight,
+                                $area, $text, $offsetX, 9, $this->fontSize + 2, $color,
                                 $this->fontNameBold
                             );
                             $offsetX += $boundaries[2] + $marginLarge;
@@ -378,7 +383,8 @@ class Layout
                         }
                     }
 
-                    $text = isset($element['data']) ? $this->data($element['data']) : null;
+                    $text = null;
+                    $text = isset($element['data']) ? $this->data($element['data']) : $text;
                     $text = isset($element['value']) ? $element['value'] : $text;
                     if ($text) {
                         $y = (int)(($size->getHeight() - $this->fontSize) * 0.2);
@@ -414,7 +420,8 @@ class Layout
                         }
                     }
 
-                    $text = isset($element['data']) ? $this->data($element['data']) : null;
+                    $text = null;
+                    $text = isset($element['data']) ? $this->data($element['data']) : $text;
                     $text = isset($element['value']) ? $element['value'] : $text;
                     if ($text) {
                         $boundaries = $this->textBoundaries($text);
