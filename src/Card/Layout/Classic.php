@@ -20,6 +20,7 @@ class Classic extends Layout
     protected $border = 1;
     protected $padding = 4;
     protected $backgroundColor = '000000';
+    protected $backgroundAlpha = 100;
     protected $textColorMuted = '999';
     protected $textColor = 'CCC';
     protected $textColorHighlight = 'FFFFFF';
@@ -51,14 +52,14 @@ class Classic extends Layout
 
         $area = $this->renderArea(new Box($this->width, $this->topAreaHeight), 'areas.top.right');
         $this->image->paste(
-            $area, new Point($this->width - $area->getSize()->getWidth() - $this->border, $this->border)
+            $area, new Point(max(0, $this->width - $area->getSize()->getWidth() - $this->border), $this->border)
         );
 
         // == bottom left elements
 
         $area = $this->renderArea(new Box($this->width, $this->bottomAreaHeight), 'areas.bottom.left');
         $this->image->paste(
-            $area, new Point($this->border, $this->height - $area->getSize()->getHeight() - $this->border)
+            $area, new Point($this->border, max(0, $this->height - $area->getSize()->getHeight() - $this->border))
         );
 
         // == bottom right elements
@@ -66,8 +67,8 @@ class Classic extends Layout
         $area = $this->renderArea(new Box($this->width, $this->bottomAreaHeight), 'areas.bottom.right');
         $this->image->paste(
             $area, new Point(
-                $this->width - $area->getSize()->getWidth() - $this->border,
-                $this->height - $area->getSize()->getHeight() - $this->border
+                max(0, $this->width - $area->getSize()->getWidth() - $this->border),
+                max(0, $this->height - $area->getSize()->getHeight() - $this->border)
             )
         );
 
@@ -91,7 +92,7 @@ class Classic extends Layout
                         $rows = isset($element['rows']) && !empty($element['rows']) ? $element['rows'] : 1;
                         $vertical = isset($element['vertical']) ? $element['vertical'] : null;
                         $align = isset($element['align']) ? $element['align'] : null;
-                        if (!empty($items)) {
+                        if (!empty($items) && is_array($items)) {
                             $availableHeight = $this->height - $this->topAreaHeight - $this->bottomAreaHeight;
                             $area = $this->createArea(new Box($gridColumnWidth * $span, $availableHeight));
                             $this->imagesGrid($area, $items, $rows);

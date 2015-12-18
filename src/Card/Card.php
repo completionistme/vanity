@@ -169,21 +169,26 @@ class Card
     public function data($data)
     {
         if (!is_null($this->data) && is_string($data)) {
-            return $this->resolveDotNotation($this->data, $data);
+            if(is_array($this->data)) {
+                return $this->resolveDotNotation($this->data, $data);
+            }
         } else {
-            $this->data = $data;
-            return $this->data;
+            if(!empty($data)) {
+                $this->data = $data;
+                return $this->data;
+            }
         }
     }
 
     /**
      * @param string $option
-     * @return array|string|null
+     * @param null   $default
+     * @return array|null|string
      */
-    public function option($option)
+    public function option($option, $default = null)
     {
-        if (!is_null($this->layoutOptions) && is_string($option)) {
-            $option = $this->resolveDotNotation($this->layoutOptions, $option);
+        if (!empty($this->layoutOptions) && is_string($option)) {
+            $option = $this->resolveDotNotation($this->layoutOptions, $option, $default);
             if($option === 'false'){
                 return false;
             }

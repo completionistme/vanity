@@ -22,6 +22,7 @@ class Layout
     protected $height;
     protected $padding;
     protected $backgroundColor;
+    protected $backgroundAlpha;
     protected $textColorMuted;
     protected $textColor;
     protected $textColorHighlight;
@@ -45,12 +46,43 @@ class Layout
 
     /**
      * Layout constructor.
+     *
+     * @param Card $card
      */
-    public function __construct()
+    public function __construct(Card $card = null)
     {
         $this->imagine = new Imagine;
+
+        $this->card($card);
+    }
+
+    /**
+     *
+     */
+    protected function create()
+    {
+        if (is_null($this->card)) {
+            return;
+        }
+
+        $this->width = (int)$this->option('width', $this->width);
+        $this->height = (int)$this->option('height', $this->height);
+        $this->padding = (int)$this->option('padding', $this->padding);
+        $this->backgroundColor = $this->option('background.color', $this->backgroundColor);
+        $this->backgroundAlpha = (int)$this->option('background.alpha', $this->backgroundAlpha);
+        $this->textColorMuted = $this->option('text.colorMuted', $this->textColorMuted);
+        $this->textColor = $this->option('text.color', $this->textColor);
+        $this->textColorHighlight = $this->option('text.color.highlight', $this->textColorHighlight);
+        $this->fontNameThin = $this->option('font.thin', $this->fontNameThin);
+        $this->fontName = $this->option('font.regular', $this->fontName);
+        $this->fontNameBold = $this->option('font.bold', $this->fontNameBold);
+        $this->fontSize = (int)$this->option('font.size', $this->fontSize);
+        $this->schemeColor = $this->option('schemeColor', $this->schemeColor);
+
         $this->image =
-            $this->imagine->create(new Box($this->width, $this->height), $this->color($this->backgroundColor));
+            $this->imagine->create(
+                new Box($this->width, $this->height), $this->color($this->backgroundColor, $this->backgroundAlpha)
+            );
     }
 
     /**
@@ -64,9 +96,11 @@ class Layout
     /**
      * @param Card $card
      */
-    public function card(Card $card)
+    public function card(Card $card = null)
     {
         $this->card = $card;
+
+        $this->create();
     }
 
     /**
@@ -79,11 +113,12 @@ class Layout
 
     /**
      * @param string $key
-     * @return array|string|null
+     * @param null   $default
+     * @return array|null|string
      */
-    protected function option($key)
+    protected function option($key, $default = null)
     {
-        return $this->card->option($key);
+        return $this->card->option($key, $default);
     }
 
     /**
@@ -174,7 +209,7 @@ class Layout
      * @param int    $size
      * @param bool   $addBackdrop
      */
-    protected function addImage($target, $url, $x, $y, $size, $addBackdrop = false)
+    protected function addImage($target, $url, $x, $y, $size, $addBackdrop = false, $alpha = 100)
     {
         try {
             $image = $this->imagine->open($url);
@@ -188,6 +223,8 @@ class Layout
                 $backdrop->effects()->gamma(0);
                 $target->paste($backdrop, new Point($x + 1, $y + 1));
             }
+
+            // TODO: alpha mask
 
             $target->paste($image, new Point($x, $y));
 
@@ -223,9 +260,13 @@ class Layout
 
     protected function addBackground()
     {
-        //$backgroundUrl = $this->option('background.value');
-        //$backgroundUrl = $backgroundUrl ? $backgroundUrl : $this->data('background');
-        $backgroundUrl = $this->data('background');
+        $backgroundUrl = $this->data($this->option('background.data'));
+        $backgroundUrl = $this->option('background.value') ? $this->option('background.value') : $backgroundUrl;
+
+        if (empty($backgroundUrl)) {
+            return;
+        }
+
         $background = $this->imagine->open($backgroundUrl);
         $sWidth = $background->getSize()->getWidth();
         $sHeight = $background->getSize()->getHeight();
@@ -317,7 +358,7 @@ class Layout
         $offsetX = $this->padding;
         foreach ($elements as $element) {
             $type = isset($element['type']) ? $element['type'] : 'text';
-            if($type === 'text' && strpos($key, 'areas.top') === 0) {
+            if ($type === 'text' && strpos($key, 'areas.top') === 0) {
                 $type = 'text-vertical';
             }
             switch ($type) {
@@ -327,10 +368,11 @@ class Layout
                     $imageUrl = null;
                     //$imageUrl = isset($element['value']) ? $element['value'] : $imageUrl;
                     $imageUrl = isset($element['data']) ? $this->data($element['data']) : $imageUrl;
+                    $alpha = isset($element['alpha']) ? $element['alpha'] : 100;
                     if ($imageUrl) {
                         $this->addImage(
-                            $area, $imageUrl, $marginSmall/2,
-                            $marginSmall/2, $imageSize, false
+                            $area, $imageUrl, $marginSmall / 2,
+                            $marginSmall / 2, $imageSize, false
                         );
                     }
                     $offsetX += $imageSize + $marginLarge;
@@ -355,13 +397,14 @@ class Layout
                     $text = null;
                     $text = isset($element['data']) ? $this->data($element['data']) : $text;
                     //$text = isset($element['value']) ? $element['value'] : $text;
-                    $color = isset($element['color']) ? $element['color'] : $this->textColorHighlight;
 
                     if ($text) {
                         $boundaries = $this->textBoundaries($text, $this->fontSize + 2, $this->fontNameBold);
                         if ($boundaries[2] + $offsetX <= $size->getWidth()) {
+                            $color = isset($element['color']) ? $element['color'] : $this->textColorHighlight;
+                            $alpha = isset($element['alpha']) ? (int)$element['alpha'] : 100;
                             $this->addText(
-                                $area, $text, $offsetX, 9, $this->fontSize + 2, $color,
+                                $area, $text, $offsetX, 9, $this->fontSize + 2, $this->color($color, $alpha),
                                 $this->fontNameBold
                             );
                             $offsetX += $boundaries[2] + $marginLarge;
@@ -370,29 +413,41 @@ class Layout
                     break;
 
                 case 'text-vertical':
+                    $text = null;
+                    $text = isset($element['data']) ? $this->data($element['data']) : $text;
+                    $text = isset($element['value']) ? $element['value'] : $text;
+                    $textWidth = 0;
+                    if ($text) {
+                        $boundaries = $this->textBoundaries($text, $this->fontSize + 2, $this->fontName);
+                        $textWidth = $boundaries[2];
+                    }
 
                     $label = isset($element['label']) ? $element['label'] : null;
                     $labelWidth = 0;
                     if ($label) {
-                        $y = $size->getHeight() - $this->fontSize - 4;
-                        $boundaries = $this->textBoundaries($label, $this->fontSize-2, $this->fontName);
+                        $boundaries = $this->textBoundaries($label, $this->fontSize - 2, $this->fontName);
                         $labelWidth = $boundaries[2];
-                        if ($boundaries[2] + $offsetX <= $size->getWidth()) {
-                            $this->addText($area, $label, $offsetX, $y, $this->fontSize-2, $this->textColorMuted, $this->fontName);
-                            $offsetX += $boundaries[2] + $marginLarge;
-                        }
                     }
 
-                    $text = null;
-                    $text = isset($element['data']) ? $this->data($element['data']) : $text;
-                    $text = isset($element['value']) ? $element['value'] : $text;
+                    $elementWidth = max($textWidth, $labelWidth);
+
                     if ($text) {
+                        $x = $offsetX + (int)(($elementWidth - $textWidth) / 2);
                         $y = (int)(($size->getHeight() - $this->fontSize) * 0.2);
-                        $boundaries = $this->textBoundaries($text, $this->fontSize+2, $this->fontName);
-                        $x = $offsetX - $marginLarge - (int)(($labelWidth)/2 + $boundaries[2]*0.5);
                         $color = isset($element['color']) ? $element['color'] : $this->textColor;
-                        $this->addText($area, $text, $x, $y, $this->fontSize+2, $color, $this->fontName);
+                        $alpha = isset($element['alpha']) ? (int)$element['alpha'] : 100;
+                        $this->addText($area, $text, $x, $y, $this->fontSize + 2, $this->color($color, $alpha), $this->fontName);
                     }
+
+                    if ($label) {
+                        $x = $offsetX + (int)(($elementWidth - $labelWidth) / 2);
+                        $y = $size->getHeight() - $this->fontSize - 4;
+                        $this->addText(
+                            $area, $label, $x, $y, $this->fontSize - 2, $this->textColorMuted, $this->fontName
+                        );
+                    }
+
+                    $offsetX += $elementWidth + $marginLarge;
                     break;
 
                 case 'text':
@@ -428,8 +483,7 @@ class Layout
                         if ($boundaries[2] + $offsetX <= $size->getWidth()) {
                             $color = isset($element['color']) ? $element['color'] : $this->textColorHighlight;
                             $alpha = isset($element['alpha']) ? (int)$element['alpha'] : 100;
-                            $color = $this->color($color, $alpha);
-                            $this->addText($area, $text, $offsetX, $y, null, $color);
+                            $this->addText($area, $text, $offsetX, $y, null, $this->color($color, $alpha));
                             $offsetX += $boundaries[2] + $marginLarge;
                         }
                     }
