@@ -78,7 +78,7 @@ class Layout
         $this->fontNameThin = $this->option('font.thin', 'fontawesome-webfont.ttf');
         $this->fontName = $this->option('font.regular', 'fontawesome-webfont.ttf');
         $this->fontNameBold = $this->option('font.bold', 'fontawesome-webfont.ttf');
-        $this->fontNameIcons = $this->option('font.regular', 'fontawesome-webfont.ttf');
+        $this->fontNameIcons = $this->option('font.icons', 'fontawesome-webfont.ttf');
         $this->fontSize = max(0, (int)$this->option('font.size', 10));
         $this->schemeColor = $this->option('schemeColor', '#6699CC');
 
