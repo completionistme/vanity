@@ -27,14 +27,10 @@ class Layout
     protected $textColorMuted;
     protected $textColor;
     protected $textColorHighlight;
-    protected $fontNameThin;
     protected $fontName;
     protected $fontNameBold;
     protected $fontSize;
     protected $schemeColor;
-
-    /** @var string $fontPath */
-    protected $fontPath;
 
     /** @var Card $card */
     protected $card;
@@ -75,9 +71,8 @@ class Layout
         $this->textColorMuted = $this->option('text.colorMuted', '#FFFFFF');
         $this->textColor = $this->option('text.color', '#FFFFFF');
         $this->textColorHighlight = $this->option('text.color.highlight', '#FFFFFF');
-        $this->fontNameThin = $this->option('font.thin', 'fontawesome-webfont.ttf');
         $this->fontName = $this->option('font.regular', 'fontawesome-webfont.ttf');
-        $this->fontNameBold = $this->option('font.bold', 'fontawesome-webfont.ttf');
+        $this->fontNameBold = $this->option('font.bold', $this->fontName);
         $this->fontNameIcons = $this->option('font.icons', 'fontawesome-webfont.ttf');
         $this->fontSize = max(0, (int)$this->option('font.size', 10));
         $this->schemeColor = $this->option('schemeColor', '#6699CC');
@@ -106,14 +101,6 @@ class Layout
         $this->card = $card;
 
         $this->create();
-    }
-
-    /**
-     * @param $fontPath
-     */
-    public function fonts($fontPath)
-    {
-        $this->fontPath = rtrim($fontPath, '/');
     }
 
     /**
@@ -158,7 +145,7 @@ class Layout
     protected function font($fontSize = null, $textColor = null, $fontName = null)
     {
         return $this->imagine->font(
-            $this->fontPath.'/'.($fontName ? $fontName : $this->fontName),
+            ($fontName ? $fontName : $this->fontName),
             $fontSize ? $fontSize : $this->fontSize,
             $textColor ? is_object($textColor) ? $textColor : $this->color($textColor) : $this->color($this->textColor)
         );
@@ -184,7 +171,7 @@ class Layout
     protected function textBoundaries($text, $fontSize = null, $fontName = null)
     {
         return imagettfbbox(
-            $fontSize ? $fontSize : $this->fontSize, 0, $this->fontPath.'/'.($fontName ? $fontName : $this->fontName),
+            $fontSize ? $fontSize : $this->fontSize, 0, ($fontName ? $fontName : $this->fontName),
             $text
         );
     }

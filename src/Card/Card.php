@@ -30,9 +30,6 @@ class Card
     /** @var bool $addSuffix */
     protected $addSuffix;
 
-    /** @var String $fontPath */
-    protected $fontPath;
-
     /** @var Layout $layout */
     protected $layout;
 
@@ -59,10 +56,8 @@ class Card
      * @param string|null $filename
      * @param string|null $format
      * @param bool|null   $addSuffix
-     * @param string|null $fontPath
      */
-    public function __construct($outputDirectory = null, $filename = null, $format = null, $addSuffix = null,
-        $fontPath = null
+    public function __construct($outputDirectory = null, $filename = null, $format = null, $addSuffix = null
     ) {
         if (!is_null($outputDirectory)) {
             $this->outputDirectory($outputDirectory);
@@ -72,9 +67,6 @@ class Card
         }
         if (!is_null($format)) {
             $this->format($format);
-        }
-        if (!is_null($fontPath)) {
-            $this->fonts($fontPath);
         }
         return $this;
     }
@@ -129,7 +121,7 @@ class Card
      */
     public function layout($layout, $layoutOptions = null, $data = null)
     {
-        if(is_a($layout, 'Completionist\Vanity\Card\Layout\Layout')) {
+        if (is_a($layout, 'Completionist\Vanity\Card\Layout\Layout')) {
             $this->layout = $layout;
             $this->layoutType = $layout->id();
         } else {
@@ -153,27 +145,17 @@ class Card
     }
 
     /**
-     * @param String $fontPath
-     * @return $this
-     */
-    public function fonts($fontPath)
-    {
-        $this->fontPath = rtrim($fontPath, '/');
-        return $this;
-    }
-
-    /**
      * @param array $data
      * @return array|string|null
      */
     public function data($data)
     {
         if (!is_null($this->data) && is_string($data)) {
-            if(is_array($this->data)) {
+            if (is_array($this->data)) {
                 return $this->resolveDotNotation($this->data, $data);
             }
         } else {
-            if(!empty($data)) {
+            if (!empty($data)) {
                 $this->data = $data;
                 return $this->data;
             }
@@ -189,10 +171,10 @@ class Card
     {
         if (!empty($this->layoutOptions) && is_string($option)) {
             $option = $this->resolveDotNotation($this->layoutOptions, $option, $default);
-            if($option === 'false'){
+            if ($option === 'false') {
                 return false;
             }
-            if($option === 'true'){
+            if ($option === 'true') {
                 return true;
             }
             return $option;
@@ -261,7 +243,6 @@ class Card
     private function drawLayout()
     {
         $this->layout->card($this);
-        $this->layout->fonts($this->fontPath);
         return $this->layout->draw();
     }
 
