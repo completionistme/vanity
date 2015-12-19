@@ -223,14 +223,13 @@ class Card
     private function validate()
     {
         if (empty($this->filename)) {
-            throw new Exception('Invalid Steam ID: "'.$this->filename.'".');
+            throw new Exception('Invalid filename: "'.$this->filename.'".');
         }
 
         if (is_null($this->format) || !in_array($this->format, ['png', 'png'])) {
             throw new Exception('Invalid format "'.$this->format.'". Use "png" or "jpg".');
         }
 
-        // TODO: validate file exists
         // TODO: validate directory is writable
         // TODO: validate given data is sufficient
     }

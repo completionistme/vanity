@@ -21,6 +21,7 @@ class Layout
     protected $width;
     protected $height;
     protected $padding;
+    protected $border;
     protected $backgroundColor;
     protected $backgroundAlpha;
     protected $textColorMuted;
@@ -36,7 +37,7 @@ class Layout
     protected $fontPath;
 
     /** @var Card $card */
-    private $card;
+    protected $card;
 
     /** @var Imagine $imagine */
     protected $imagine;
@@ -57,32 +58,36 @@ class Layout
     }
 
     /**
-     *
+     * @return bool
      */
     protected function create()
     {
         if (is_null($this->card)) {
-            return;
+            return false;
         }
 
-        $this->width = (int)$this->option('width', $this->width);
-        $this->height = (int)$this->option('height', $this->height);
-        $this->padding = (int)$this->option('padding', $this->padding);
-        $this->backgroundColor = $this->option('background.color', $this->backgroundColor);
-        $this->backgroundAlpha = (int)$this->option('background.alpha', $this->backgroundAlpha);
-        $this->textColorMuted = $this->option('text.colorMuted', $this->textColorMuted);
-        $this->textColor = $this->option('text.color', $this->textColor);
-        $this->textColorHighlight = $this->option('text.color.highlight', $this->textColorHighlight);
-        $this->fontNameThin = $this->option('font.thin', $this->fontNameThin);
-        $this->fontName = $this->option('font.regular', $this->fontName);
-        $this->fontNameBold = $this->option('font.bold', $this->fontNameBold);
-        $this->fontSize = (int)$this->option('font.size', $this->fontSize);
-        $this->schemeColor = $this->option('schemeColor', $this->schemeColor);
+        $this->width = max(10, (int)$this->option('width', 10));
+        $this->height = max(10, (int)$this->option('height', 10));
+        $this->padding = max(0, (int)$this->option('padding', 0));
+        $this->border = max(0, (int)$this->option('border', 0));
+        $this->backgroundColor = $this->option('background.color', '#000000');
+        $this->backgroundAlpha = max(0, min(100, (int)$this->option('background.alpha', 100)));
+        $this->textColorMuted = $this->option('text.colorMuted', '#FFFFFF');
+        $this->textColor = $this->option('text.color', '#FFFFFF');
+        $this->textColorHighlight = $this->option('text.color.highlight', '#FFFFFF');
+        $this->fontNameThin = $this->option('font.thin', 'fontawesome-webfont.ttf');
+        $this->fontName = $this->option('font.regular', 'fontawesome-webfont.ttf');
+        $this->fontNameBold = $this->option('font.bold', 'fontawesome-webfont.ttf');
+        $this->fontNameIcons = $this->option('font.regular', 'fontawesome-webfont.ttf');
+        $this->fontSize = max(0, (int)$this->option('font.size', 10));
+        $this->schemeColor = $this->option('schemeColor', '#6699CC');
 
         $this->image =
             $this->imagine->create(
                 new Box($this->width, $this->height), $this->color($this->backgroundColor, $this->backgroundAlpha)
             );
+
+        return true;
     }
 
     /**
@@ -349,7 +354,6 @@ class Layout
             return $area;
         }
 
-        $iconFontName = 'fontawesome.ttf';
         $iconFontSize = 10;
         $marginSmall = 2;
         $margin = 4;
@@ -436,7 +440,9 @@ class Layout
                         $y = (int)(($size->getHeight() - $this->fontSize) * 0.2);
                         $color = isset($element['color']) ? $element['color'] : $this->textColor;
                         $alpha = isset($element['alpha']) ? (int)$element['alpha'] : 100;
-                        $this->addText($area, $text, $x, $y, $this->fontSize + 2, $this->color($color, $alpha), $this->fontName);
+                        $this->addText(
+                            $area, $text, $x, $y, $this->fontSize + 2, $this->color($color, $alpha), $this->fontName
+                        );
                     }
 
                     if ($label) {
@@ -468,9 +474,9 @@ class Layout
                     $icon = isset($element['icon']) ? $element['icon'] : null;
                     if ($icon) {
                         $iconY = (int)(($size->getHeight() - $iconFontSize) / 2);
-                        $boundaries = $this->textBoundaries($icon, $iconFontSize, $iconFontName);
+                        $boundaries = $this->textBoundaries($icon, $iconFontSize, $this->fontNameIcons);
                         if ($boundaries[2] + $offsetX <= $size->getWidth()) {
-                            $this->addText($area, $icon, $offsetX, $iconY, $iconFontSize, null, $iconFontName);
+                            $this->addText($area, $icon, $offsetX, $iconY, $iconFontSize, null, $this->fontNameIcons);
                             $offsetX += $boundaries[2] + 4;
                         }
                     }

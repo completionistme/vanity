@@ -13,27 +13,18 @@ class Classic extends Layout
 {
     protected $id = 'classic';
 
-    // TODO: add settings below as layout options
-
-    protected $width = 400;
-    protected $height = 116;
-    protected $border = 1;
-    protected $padding = 4;
-    protected $backgroundColor = '000000';
-    protected $backgroundAlpha = 100;
-    protected $textColorMuted = '999';
-    protected $textColor = 'CCC';
-    protected $textColorHighlight = 'FFFFFF';
-    protected $fontNameThin = 'MyriadPro-Regular.otf';
-    protected $fontName = 'MyriadPro-Bold.otf';
-    protected $fontNameBold = 'MyriadPro-Bold.otf';
-    protected $fontSize = 8;
-    protected $schemeColor = '4F4F57';
-    //protected $schemeColor = '156';
-    //protected $schemeColor = '621';
-
     private $topAreaHeight = 30;
     private $bottomAreaHeight = 15;
+
+    protected function create()
+    {
+        if (!parent::create()) {
+            return false;
+        }
+
+        $this->topAreaHeight = (int)$this->option('topAreaHeight', $this->topAreaHeight);
+        $this->bottomAreaHeight = (int)$this->option('bottomAreaHeight', $this->bottomAreaHeight);
+    }
 
     /**
      * @return Image
