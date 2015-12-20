@@ -36,32 +36,33 @@ class Classic extends Layout
 
         // == top left elements
 
-        $area = $this->renderArea(new Box($this->width, $this->topAreaHeight), 'areas.top.left');
+        $area = $this->renderArea(new Box($this->width - $this->border*2, $this->topAreaHeight - $this->border*2), 'areas.top.left');
         $this->image->paste($area, new Point($this->border, $this->border));
 
         // == top right elements
 
-        $area = $this->renderArea(new Box($this->width, $this->topAreaHeight), 'areas.top.right');
+        $area = $this->renderArea(new Box($this->width - $this->border*2, $this->topAreaHeight - $this->border*2), 'areas.top.right');
         $this->image->paste(
             $area, new Point(max(0, $this->width - $area->getSize()->getWidth() - $this->border), $this->border)
         );
 
         // == bottom left elements
 
-        $area = $this->renderArea(new Box($this->width, $this->bottomAreaHeight), 'areas.bottom.left');
+        $area = $this->renderArea(new Box($this->width - $this->border*2, $this->bottomAreaHeight - $this->border*2), 'areas.bottom.left');
         $this->image->paste(
             $area, new Point($this->border, max(0, $this->height - $area->getSize()->getHeight() - $this->border))
         );
 
         // == bottom right elements
 
-        $area = $this->renderArea(new Box($this->width, $this->bottomAreaHeight), 'areas.bottom.right');
+        $area = $this->renderArea(new Box($this->width - $this->border*2, $this->bottomAreaHeight - $this->border*2), 'areas.bottom.right');
         $this->image->paste(
             $area, new Point(
                 max(0, $this->width - $area->getSize()->getWidth() - $this->border),
                 max(0, $this->height - $area->getSize()->getHeight() - $this->border)
             )
         );
+
 
         // == center elements
 

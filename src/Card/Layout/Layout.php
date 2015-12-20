@@ -184,12 +184,15 @@ class Layout
      * @param int    $size
      * @param string $color
      * @param string $font
+     * @param bool   $shadow
      */
-    protected function addText($target, $text, $x, $y, $size = null, $color = null, $font = null)
+    protected function addText($target, $text, $x, $y, $size = null, $color = null, $font = null, $shadow = true)
     {
-        $target->draw()->text(
-            $text, $this->font($size, $this->color($this->schemeColor, 60), $font), new Point($x + 1, $y + 1), 0
-        );
+        if($shadow) {
+            $target->draw()->text(
+                $text, $this->font($size, $this->color($this->schemeColor, 60), $font), new Point($x + 1, $y + 1), 0
+            );
+        }
         $target->draw()->text($text, $this->font($size, $color, $font), new Point($x, $y), 0);
     }
 
