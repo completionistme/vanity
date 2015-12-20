@@ -215,7 +215,7 @@ class Layout
 
             if ($addBackdrop) {
                 $backdrop = $image->copy();
-                $backdrop->effects()->gamma(0);
+                $backdrop->effects()->gamma(0.4);
                 $target->paste($backdrop, new Point($x + 1, $y + 1));
             }
 
@@ -358,7 +358,7 @@ class Layout
             switch ($type) {
 
                 case 'avatar':
-                    $imageSize = $size->getHeight() - $marginSmall;
+                    $imageSize = $size->getHeight() - $marginSmall / 2;
                     $imageUrl = null;
                     //$imageUrl = isset($element['value']) ? $element['value'] : $imageUrl;
                     $imageUrl = isset($element['data']) ? $this->data($element['data']) : $imageUrl;
@@ -427,7 +427,7 @@ class Layout
 
                     if ($text) {
                         $x = $offsetX + (int)(($elementWidth - $textWidth) / 2);
-                        $y = (int)(($size->getHeight() - $this->fontSize) * 0.2);
+                        $y = $this->padding;
                         $color = isset($element['color']) ? $element['color'] : $this->textColor;
                         $alpha = isset($element['alpha']) ? (int)$element['alpha'] : 100;
                         $this->addText(
@@ -437,7 +437,7 @@ class Layout
 
                     if ($label) {
                         $x = $offsetX + (int)(($elementWidth - $labelWidth) / 2);
-                        $y = $size->getHeight() - $this->fontSize - 4;
+                        $y = $size->getHeight() - $this->fontSize + 2 - $this->padding;
                         $this->addText(
                             $area, $label, $x, $y, $this->fontSize - 2, $this->textColorMuted, $this->fontName
                         );
@@ -450,7 +450,7 @@ class Layout
                     //default
 
                 default:
-                    $y = (int)(($size->getHeight() - $this->fontSize) / 2);
+                    $y = (int)(($size->getHeight() - $marginSmall - $this->fontSize) / 2);
 
                     $label = isset($element['label']) ? $element['label'] : null;
                     if ($label) {
@@ -463,7 +463,7 @@ class Layout
 
                     $icon = isset($element['icon']) ? $element['icon'] : null;
                     if ($icon) {
-                        $iconY = (int)(($size->getHeight() - $iconFontSize) / 2);
+                        $iconY = (int)(($size->getHeight() - $marginSmall - $iconFontSize) / 2);
                         $boundaries = $this->textBoundaries($icon, $iconFontSize, $this->fontNameIcons);
                         if ($boundaries[2] + $offsetX <= $size->getWidth()) {
                             $this->addText($area, $icon, $offsetX, $iconY, $iconFontSize, null, $this->fontNameIcons);
