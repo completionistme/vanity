@@ -407,8 +407,8 @@ class Layout
             $offsetX = empty($offsetX) ? $padding : $offsetX;
 
             $value = null;
-            $value = isset($element['value']) ? $element['value'] : $value;
             $value = isset($element['data']) ? $this->data($element['data']) : $value;
+            $value = isset($element['value']) ? $element['value'] : $value;
 
             // TODO: add as "vertical" flag to type "text"
             if ($type == 'text' && strpos($key, 'areas.top') === 0) {
