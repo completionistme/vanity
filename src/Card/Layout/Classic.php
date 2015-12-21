@@ -36,30 +36,44 @@ class Classic extends Layout
 
         // == top left elements
 
-        $area = $this->renderArea(new Box($this->width - $this->border*2, $this->topAreaHeight - $this->border*2), 'areas.top.left');
-        $this->image->paste($area, new Point($this->border, $this->border));
+        $area = $this->renderArea(
+            new Box($this->width - $this->cardPadding * 2, $this->topAreaHeight),
+            'areas.top.left'
+        );
+        $this->image->paste($area, new Point($this->cardPadding, $this->cardPadding));
 
         // == top right elements
 
-        $area = $this->renderArea(new Box($this->width - $this->border*2, $this->topAreaHeight - $this->border*2), 'areas.top.right');
+        $area = $this->renderArea(
+            new Box($this->width - $this->cardPadding * 2, $this->topAreaHeight),
+            'areas.top.right'
+        );
         $this->image->paste(
-            $area, new Point(max(0, $this->width - $area->getSize()->getWidth() - $this->border), $this->border)
+            $area,
+            new Point(max(0, $this->width - $area->getSize()->getWidth() - $this->cardPadding), $this->cardPadding)
         );
 
         // == bottom left elements
 
-        $area = $this->renderArea(new Box($this->width - $this->border*2, $this->bottomAreaHeight - $this->border*2), 'areas.bottom.left');
+        $area = $this->renderArea(
+            new Box($this->width - $this->cardPadding * 2, $this->bottomAreaHeight),
+            'areas.bottom.left'
+        );
         $this->image->paste(
-            $area, new Point($this->border, max(0, $this->height - $area->getSize()->getHeight() - $this->border))
+            $area,
+            new Point($this->cardPadding, max(0, $this->height - $area->getSize()->getHeight() - $this->cardPadding))
         );
 
         // == bottom right elements
 
-        $area = $this->renderArea(new Box($this->width - $this->border*2, $this->bottomAreaHeight - $this->border*2), 'areas.bottom.right');
+        $area = $this->renderArea(
+            new Box($this->width - $this->cardPadding * 2, $this->bottomAreaHeight),
+            'areas.bottom.right'
+        );
         $this->image->paste(
             $area, new Point(
-                max(0, $this->width - $area->getSize()->getWidth() - $this->border),
-                max(0, $this->height - $area->getSize()->getHeight() - $this->border)
+                max(0, $this->width - $area->getSize()->getWidth() - $this->cardPadding),
+                max(0, $this->height - $area->getSize()->getHeight() - $this->cardPadding)
             )
         );
 
@@ -90,13 +104,13 @@ class Classic extends Layout
                             $this->imagesGrid($area, $items, $rows);
                             switch ($align) {
                                 case 'left':
-                                    $posX = $colCount * $gridColumnWidth + $this->padding;
+                                    $posX = $colCount * $gridColumnWidth + $this->areaPadding;
                                     break;
                                 case 'right':
                                     $posX =
                                         $colCount * $gridColumnWidth + $gridColumnWidth * $span - $area->getSize()
                                             ->getWidth()
-                                        - $this->padding;
+                                        - $this->areaPadding;
                                     break;
                                 case 'center':
                                     // default
@@ -109,11 +123,11 @@ class Classic extends Layout
                             }
                             switch ($vertical) {
                                 case 'top':
-                                    $posY = $this->topAreaHeight + $this->padding - 1;
+                                    $posY = $this->topAreaHeight + $this->areaPadding - 1;
                                     break;
                                 case 'bottom':
                                     $posY = $this->topAreaHeight + $availableHeight - $area->getSize()->getHeight()
-                                        - $this->padding;
+                                        - $this->areaPadding;
                                     break;
                                 case 'center':
                                     // default
@@ -138,7 +152,10 @@ class Classic extends Layout
         // == top overlay
 
         $this->addGradient(
-            1, 1, $this->width - 2, $this->topAreaHeight,
+            $this->cardPadding,
+            $this->cardPadding,
+            $this->width - $this->cardPadding * 2,
+            $this->topAreaHeight,
             $this->color($this->schemeColor, 30), $this->color('111', 65),
             true
         );
@@ -146,7 +163,10 @@ class Classic extends Layout
         // == bottom overlay
 
         $this->addGradient(
-            1, $this->height - $this->bottomAreaHeight - 1, $this->width - 2, $this->bottomAreaHeight,
+            $this->cardPadding,
+            $this->height - $this->bottomAreaHeight - $this->cardPadding,
+            $this->width - $this->cardPadding * 2,
+            $this->bottomAreaHeight,
             $this->color($this->schemeColor, 30), $this->color('111', 65),
             true
         );
