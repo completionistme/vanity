@@ -28,6 +28,11 @@ class Layout
     protected $backgroundColor;
     protected $backgroundAlpha;
 
+    protected $gridItemBorderSize;
+    protected $gridItemBorderColor;
+    protected $gridItemBorderAlpha;
+    protected $gridItemMargin;
+
     protected $textColor;
     protected $textColorLabel;
     protected $textColorIcon;
@@ -81,6 +86,11 @@ class Layout
 
         $this->backgroundColor = $this->option('background.color', '#000000');
         $this->backgroundAlpha = max(0, min(100, (int)$this->option('background.alpha', 100)));
+
+        $this->gridItemBorderSize = $this->option('gridItem.borderSize', 1);
+        $this->gridItemBorderColor = $this->option('gridItem.borderColor', '#000000');
+        $this->gridItemBorderAlpha = $this->option('gridItem.borderAlpha', 100);
+        $this->gridItemMargin = $this->option('gridItem.margin', 1);
 
         $this->textColor = $this->option('text.color', '#FFFFFF');
         $this->textColorLabel = $this->option('text.labelColor', '#CCCCCC');
@@ -373,6 +383,7 @@ class Layout
             // get new image size
             $imageSize = $image->getSize();
 
+            // position by size and alignment options
             $x = 0;
             $y = 0;
 
@@ -463,8 +474,8 @@ class Layout
 
         // TODO: add as setting
         $itemMargin = 8;
+        $offsetX = 0;
 
-        $offsetX = null;
         foreach ($elements as $element) {
 
             // element overrides
@@ -482,7 +493,6 @@ class Layout
             $labelSpace = isset($element['labelSpace']) ? $element['labelSpace'] : $this->labelSpace;
 
             $padding = isset($element['padding']) ? $element['padding'] : $this->areaPadding;
-            $offsetX = empty($offsetX) ? $padding : $offsetX;
 
             $value = null;
             $value = isset($element['data']) ? $this->data($element['data']) : $value;
@@ -501,6 +511,9 @@ class Layout
                 }
             }
 
+            // TODO: only for left alignment in the future, more dynamic implementation of areas
+            $offsetX += empty($offsetX) ? $padding : $itemMargin;
+
             switch ($type) {
 
                 case 'image':
@@ -517,7 +530,7 @@ class Layout
                             $shadow
                         );
                     }
-                    $offsetX += $imageSize + $itemMargin;
+                    $offsetX += $imageSize;
 
                     break;
 
@@ -545,7 +558,8 @@ class Layout
                         $offsetY = (int)($areaSize->getHeight() - $fontSize - $fontSizeLabel - $labelSpace) / 2;
                     }
 
-                    $elementWidth = max($textWidth, $labelWidth);
+                    // add a pixel to font boundary
+                    $elementWidth = max($textWidth, $labelWidth) + 1;
 
                     if ($icon) {
                         $x = $offsetX + (int)(($elementWidth - $textWidth) / 2);
@@ -577,8 +591,7 @@ class Layout
                         );
                     }
 
-                    // add a pixel to font boundary
-                    $offsetX += $elementWidth + $itemMargin + ($shadow ? 1 : 1);
+                    $offsetX += $elementWidth;
                     break;
 
                 case 'text':
@@ -616,14 +629,20 @@ class Layout
                         if ($boundaries[2] + $offsetX <= $areaSize->getWidth()) {
                             $this->addText($area, $value, $offsetX, $y, $fontSize, $this->color($color, $alpha));
                             // add a pixel to font boundary
-                            $offsetX += $boundaries[2] + ($shadow ? 1 : 0) + $itemMargin;
+                            $offsetX += $boundaries[2] + ($shadow ? 1 : 0);
                         }
                     }
                     break;
             }
         }
-        $offsetX += $this->areaPadding - $itemMargin;
-        $area->crop(new Point(0, 0), new Box(max($offsetX, 1), $areaSize->getHeight()));
+
+        // final trim width
+        // TODO: only add trailing padding if alignment is right
+        $trimWidth = $offsetX + $this->areaPadding;
+
+        $area->crop(
+            new Point(0, 0), new Box(min(max($trimWidth, 1), $this->width - $this->areaPadding), $areaSize->getHeight())
+        );
         return $area;
     }
 
@@ -638,19 +657,19 @@ class Layout
             return;
         }
 
-        // TODO: settings
-        $borderSize = isset($items[0]['color']) ? 1 : 0;
-        $margin = 2;
+        // border size acts as padding
+        // item dimensions area effective (image size + border)
 
-        $itemHeight = min(42, (int)(($area->getSize()->getHeight() - $margin * ($rows + 1)) / $rows));
+        $itemHeight = min(42, (int)(($area->getSize()->getHeight() - $this->gridItemMargin * ($rows + 1)) / $rows));
 
         $testImageSize = $this->imagine->open($items[0]['image'])->getSize();
 
-        $testAspect = $testImageSize->getWidth() / $testImageSize->getHeight();
-        $itemWidth = ceil($itemHeight * $testAspect);
+        $imageAspect = $testImageSize->getWidth() / $testImageSize->getHeight();
+        $imageHeight = $itemHeight - $this->gridItemBorderSize * 2;
+        $imageWidth = (int)($imageHeight * $imageAspect);
+        $itemWidth = $imageWidth + $this->gridItemBorderSize * 2;
 
-        //$imageHeight = ceil($itemHeight - $borderSize * 2);
-        $size = new Box($itemWidth - $borderSize * 2 + 1, $itemHeight - $borderSize * 2 + 1);
+        $imageSize = new Box($imageWidth, $imageHeight);
 
         $trimWidth = $itemWidth;
         $trimHeight = $itemHeight;
@@ -659,31 +678,49 @@ class Layout
         foreach ($items as $item) {
 
             $item = is_array($item) ? (object)$item : $item;
+
+            // break row
             if (($offsetX + $itemWidth) > $area->getSize()->getWidth()) {
                 $offsetX = 0;
-                $offsetY += $itemHeight + $margin;
+                $offsetY += $itemHeight + $this->gridItemMargin;
             }
             if ($offsetY + $itemHeight > $area->getSize()->getHeight()) {
                 break;
             }
+
             $trimHeight = max($trimHeight, $offsetY + $itemHeight);
             $trimWidth = max($trimWidth, $offsetX + $itemWidth);
 
-            // draw border
-            if (isset($item->color)) {
+            if ($trimWidth > $area->getSize()->getWidth()) {
+                continue;
+            }
+
+            if (!empty($this->gridItemBorderSize)) {
+
+                $borderColor = isset($item->color) ? $item->color : $this->gridItemBorderColor;
+
+                // remove one pixel on all sides - polygon coordinates are inclusive!
                 $area->draw()->polygon(
                     [new Point($offsetX, $offsetY),
-                     new Point($offsetX + $itemWidth, $offsetY),
-                     new Point($offsetX + $itemWidth, $offsetY + $itemHeight),
-                     new Point($offsetX, $offsetY + $itemHeight)],
-                    $this->color($item->color, 70), true
+                     new Point($offsetX + $itemWidth - 1, $offsetY),
+                     new Point($offsetX + $itemWidth - 1, $offsetY + $itemHeight - 1),
+                     new Point($offsetX, $offsetY + $itemHeight - 1)],
+                    $this->color($borderColor, $this->gridItemBorderAlpha), true, 1
                 );
             }
 
-            $this->addImage($area, $item->image, $offsetX + $borderSize, $offsetY + $borderSize, $size);
-            $offsetX += $itemWidth + $margin;
+            $this->addImage(
+                $area, $item->image,
+                $offsetX + $this->gridItemBorderSize,
+                $offsetY + $this->gridItemBorderSize,
+                $imageSize
+            );
+            $offsetX += $itemWidth + $this->gridItemMargin;
         }
 
-        $area->crop(new Point(0, 0), new Box($trimWidth + $borderSize, $trimHeight + $borderSize));
+        $area->crop(
+            new Point(0, 0),
+            new Box(min($area->getSize()->getWidth(), $trimWidth), $trimHeight)
+        );
     }
 }
