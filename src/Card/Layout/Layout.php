@@ -285,53 +285,131 @@ class Layout
 
     protected function addBackground()
     {
-        $backgroundUrl = $this->data($this->option('background.data'));
-        $backgroundUrl = $this->option('background.value') ? $this->option('background.value') : $backgroundUrl;
+        $imageUrl = $this->data($this->option('background.data'));
+        $imageUrl = $this->option('background.value') ? $this->option('background.value') : $imageUrl;
 
-        if (empty($backgroundUrl)) {
+        if (empty($imageUrl)) {
             return;
         }
 
-        $background = $this->imagine->open($backgroundUrl);
-        $sWidth = $background->getSize()->getWidth();
-        $sHeight = $background->getSize()->getHeight();
-        $sAspect = $sWidth / $sHeight;
-        //$tAspect = $this->width / $this->height;
-        $background->resize(new Box($this->width, $this->width / $sAspect));
-        $sHeight = $background->getSize()->getHeight();
-        $size = new Box($this->width, $this->height);
+        $resizeMode = $this->option('background.size', 'cover'); // cover|contain
+        $align = $this->option('background.align');
+        $verticalAlign = $this->option('background.vertical');
 
+        $image = $this->imagine->open($imageUrl);
+        $imageSize = $image->getSize();
+        $imageAspect = $imageSize->getWidth() / $imageSize->getHeight();
+
+        $cardSize = new Box($this->width, $this->height);
+        $cardAspect = $this->width / $this->height;
+
+        // position of background
+        $position = new Point(0, 0);
+
+        // crop if resize mode is cover
+        if ($resizeMode == 'cover') {
+
+            if ($imageAspect <= $cardAspect) {
+                // resize to max width => align the image vertically
+                $image->resize(new Box($this->width, $this->width / $imageAspect));
+            } else {
+                // resize to max height => align the image horizontally
+                $image->resize(new Box($this->height * $imageAspect, $this->height));
+            }
+
+            // get new image size
+            $imageSize = $image->getSize();
+
+            // cover will add cropped image always at 0/0 and be of the card's size
+            $position = new Point(0, 0);
+
+            if ($imageAspect <= $cardAspect) {
+                switch ($verticalAlign) {
+                    case 'bottom':
+                        $image->crop(new Point(0, (int)(($imageSize->getHeight() - $this->height))), $cardSize);
+                        break;
+                    case 'lowercenter':
+                        $image->crop(new Point(0, (int)(($imageSize->getHeight() - $this->height) / 3 * 2)), $cardSize);
+                        break;
+                    case 'center':
+                        $image->crop(new Point(0, (int)(($imageSize->getHeight() - $this->height) / 2)), $cardSize);
+                        break;
+                    case 'uppercenter':
+                        $image->crop(new Point(0, (int)(($imageSize->getHeight() - $this->height) / 3)), $cardSize);
+                        break;
+                    case 'top':
+                        // default
+                    default:
+                        $image->crop(new Point(0, 0), $cardSize);
+                        break;
+                }
+            } else {
+                switch ($align) {
+                    case 'right':
+                        $image->crop(new Point($imageSize->getWidth() - $this->width, 0), $cardSize);
+                        break;
+                    case 'center':
+                        $image->crop(new Point((int)(($imageSize->getWidth() - $this->width) / 2), 0), $cardSize);
+                        break;
+                    case 'left':
+                        // default
+                    default:
+                        $image->crop(new Point(0, 0), $cardSize);
+                        break;
+                }
+            }
+        }
+
+        if ($resizeMode == 'contain') {
+
+            if ($imageAspect <= $cardAspect) {
+                // resize to max height => align the image horizontally
+                $image->resize(new Box($this->height * $imageAspect, $this->height));
+            } else {
+                // resize to max width => align the image vertically
+                $image->resize(new Box($this->width, $this->width / $imageAspect));
+            }
+
+            // get new image size
+            $imageSize = $image->getSize();
+
+            $x = 0;
+            $y = 0;
+
+            switch ($align) {
+                case 'center':
+                    $x = (int)(($this->width - $imageSize->getWidth()) / 2);
+                    break;
+                case 'right':
+                    $x = $this->width - $imageSize->getWidth();
+                    break;
+            }
+
+            switch ($verticalAlign) {
+                case 'center':
+                    $y = (int)(($this->height - $imageSize->getHeight()) / 2);
+                    break;
+                case 'bottom':
+                    $y = (int)($this->height - $imageSize->getHeight());
+                    break;
+            }
+
+            $position = new Point($x, $y);
+        }
+
+        // add filters before pasting
         $blur = $this->option('background.blur');
         $darken = $this->option('background.darken');
         $colorize = $this->option('background.colorize');
-
         if ($darken || $colorize) {
-            $background->effects()->gamma(1.2);
+            $image->effects()->gamma(1.2);
         }
         if ($blur) {
-            $background->effects()->blur();
+            $image->effects()->blur();
         }
-        $verticalAlign = $this->option('background.vertical');
-        switch ($verticalAlign) {
-            case 'bottom':
-                $background->crop(new Point(0, (int)(($sHeight - $this->height))), $size);
-                break;
-            case 'lowercenter':
-                $background->crop(new Point(0, (int)(($sHeight - $this->height) / 3 * 2)), $size);
-                break;
-            case 'center':
-                $background->crop(new Point(0, (int)(($sHeight - $this->height) / 2)), $size);
-                break;
-            case 'uppercenter':
-                $background->crop(new Point(0, (int)(($sHeight - $this->height) / 3)), $size);
-                break;
-            case 'top':
-                // default
-            default:
-                $background->crop(new Point(0, 0), $size);
-                break;
-        }
-        $this->image->paste($background, new Point(0, 0));
+
+        // paste background
+        $this->image->paste($image, $position);
 
         // == background tint overlay
 
