@@ -82,11 +82,11 @@ class Classic extends Layout
 
         $columns = $this->option('areas.center');
         if (count($columns) > 0) {
-            $minGutterWidth = 0;
+            //$minGutterWidth = $this->areaPadding;
             $gridColumnWidth = (int)($this->width / count($columns));
-            if (count($columns) > 1) {
-                $gridColumnWidth -= (int)($minGutterWidth / (count($columns) - 1));
-            }
+            //if (count($columns) > 1) {
+            //    $gridColumnWidth -= (int)($minGutterWidth / (count($columns) - 1));
+            //}
 
             $colCount = 0;
             foreach ($columns as $elements) {
@@ -99,42 +99,36 @@ class Classic extends Layout
                         $vertical = isset($element['vertical']) ? $element['vertical'] : null;
                         $align = isset($element['align']) ? $element['align'] : null;
                         if (!empty($items) && is_array($items)) {
-                            $availableHeight = $this->height - $this->topAreaHeight - $this->bottomAreaHeight;
+                            $availableHeight = $this->height - $this->topAreaHeight - $this->bottomAreaHeight - $this->cardPadding * 2 - $this->areaPadding * 2;
                             $area = $this->createArea(new Box($gridColumnWidth * $span, $availableHeight));
                             $this->imagesGrid($area, $items, $rows);
+                            switch ($vertical) {
+                                case 'top':
+                                    $posY = $this->topAreaHeight + $this->cardPadding + $this->areaPadding;
+                                    break;
+                                case 'bottom':
+                                    $posY = $this->topAreaHeight + $this->cardPadding + $this->areaPadding + $availableHeight - $area->getSize()->getHeight();
+                                    break;
+                                case 'center':
+                                    // default
+                                default:
+                                    $posY = $this->topAreaHeight + $this->cardPadding + $this->areaPadding
+                                        + (int)(($availableHeight - $area->getSize()->getHeight()) / 2);
+                                    break;
+                            }
                             switch ($align) {
                                 case 'left':
                                     $posX = $colCount * $gridColumnWidth + $this->areaPadding;
                                     break;
                                 case 'right':
-                                    $posX =
-                                        $colCount * $gridColumnWidth + $gridColumnWidth * $span - $area->getSize()
-                                            ->getWidth()
-                                        - $this->areaPadding;
+                                    $posX = $colCount * $gridColumnWidth
+                                        + $gridColumnWidth * $span - $area->getSize()->getWidth() - $this->areaPadding;
                                     break;
                                 case 'center':
                                     // default
                                 default:
-                                    $posX =
-                                        $colCount * $gridColumnWidth + (int)(($gridColumnWidth * $span - $area->getSize(
-                                                )
-                                                    ->getWidth()) / 2);
-                                    break;
-                            }
-                            switch ($vertical) {
-                                case 'top':
-                                    $posY = $this->topAreaHeight + $this->areaPadding - 1;
-                                    break;
-                                case 'bottom':
-                                    $posY = $this->topAreaHeight + $availableHeight - $area->getSize()->getHeight()
-                                        - $this->areaPadding;
-                                    break;
-                                case 'center':
-                                    // default
-                                default:
-                                    $posY =
-                                        $this->topAreaHeight + (int)(($availableHeight - $area->getSize()->getHeight())
-                                            / 2);
+                                    $posX = $colCount * $gridColumnWidth
+                                        + (int)(($gridColumnWidth * $span - $area->getSize()->getWidth()) / 2);
                                     break;
                             }
                             $this->image->paste($area, new Point($posX, $posY));

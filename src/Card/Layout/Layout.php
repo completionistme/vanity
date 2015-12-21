@@ -30,6 +30,7 @@ class Layout
 
     protected $textColor;
     protected $textColorLabel;
+    protected $textColorIcon;
     protected $textShadow;
     protected $labelSpace;
 
@@ -82,9 +83,10 @@ class Layout
         $this->backgroundAlpha = max(0, min(100, (int)$this->option('background.alpha', 100)));
 
         $this->textColor = $this->option('text.color', '#FFFFFF');
-        $this->textColorLabel = $this->option('text.labelColor', '#FFFFFF');
-        $this->textShadow = $this->option('text.shadow', true);
+        $this->textColorLabel = $this->option('text.labelColor', '#CCCCCC');
+        $this->textColorIcon = $this->option('text.iconColor', '#CCCCCC');
         $this->labelSpace = max(0, (int)$this->option('text.labelSpace', 4));
+        $this->textShadow = $this->option('text.shadow', true);
 
         $this->fontName = $this->option('text.font', 'fontawesome-webfont.ttf');
         $this->fontSize = max(0, (int)$this->option('text.size', 8));
@@ -220,21 +222,26 @@ class Layout
     }
 
     /**
-     * @param Image  $target
-     * @param string $url
-     * @param int    $x
-     * @param int    $y
-     * @param int    $size
-     * @param bool   $shadow
+     * @param Image   $target
+     * @param string  $url
+     * @param int     $x
+     * @param int     $y
+     * @param int|Box $size
+     * @param bool    $shadow
      */
     protected function addImage($target, $url, $x, $y, $size, $shadow = false)
     {
         try {
             $image = $this->imagine->open($url);
-            $aspect = $image->getSize()->getHeight() / $image->getSize()->getWidth();
-            $width = $size / $aspect;
-            $height = $size;
-            $image->resize(new Box($width, $height));
+
+            if (is_numeric($size)) {
+                $aspect = $image->getSize()->getHeight() / $image->getSize()->getWidth();
+                $width = $size / $aspect;
+                $height = $size;
+                $size = new Box($width, $height);
+            }
+
+            $image->resize($size);
 
             if ($shadow) {
                 $backdrop = $image->copy();
@@ -386,6 +393,8 @@ class Layout
             $type = isset($element['type']) ? $element['type'] : 'text';
             $label = isset($element['label']) ? $element['label'] : null;
             $icon = isset($element['icon']) ? $element['icon'] : null;
+            $iconColor = isset($element['iconColor']) ? $element['iconColor'] : $this->textColorIcon;
+            $labelColor = isset($element['labelColor']) ? $element['labelColor'] : $this->textColorLabel;
             $color = isset($element['color']) ? $element['color'] : $this->textColor;
             $alpha = isset($element['alpha']) ? (int)$element['alpha'] : 100;
             $shadow = isset($element['shadow']) ? $element['shadow'] : true;
@@ -421,6 +430,7 @@ class Layout
                     // TODO: implement alpha masking
                     //$alpha = isset($element['alpha']) ? $element['alpha'] : 100;
 
+                    $shadow = isset($element['shadow']) ? $element['shadow'] : false;
                     $imageSize = $areaSize->getHeight() - $padding * 2;
 
                     if ($value) {
@@ -462,7 +472,10 @@ class Layout
                     if ($icon) {
                         $x = $offsetX + (int)(($elementWidth - $textWidth) / 2);
                         $y = $offsetY - ($shadow ? 1 : 0);
-                        $this->addText($area, $icon, $x, $y, $fontSizeIcon, $this->color($this->textColorLabel, $alpha), $this->fontNameIcon);
+                        $this->addText(
+                            $area, $icon, $x, $y, $fontSizeIcon, $this->color($iconColor, $alpha),
+                            $this->fontNameIcon
+                        );
                     }
 
                     if ($value) {
@@ -481,7 +494,8 @@ class Layout
                         $x = $offsetX + (int)(($elementWidth - $labelWidth) / 2);
                         $y = $offsetY - ($shadow ? 1 : 0);
                         $this->addText(
-                            $area, $label, $x, $y, $fontSizeLabel, $this->textColorLabel, $this->fontName, $shadow
+                            $area, $label, $x, $y, $fontSizeLabel, $this->color($labelColor, $alpha), $this->fontName,
+                            $shadow
                         );
                     }
 
@@ -500,7 +514,10 @@ class Layout
                         $iconY = (int)(($areaSize->getHeight() - $fontSizeIcon) / 2);
                         $boundaries = $this->textBoundaries($icon, $fontSizeIcon, $this->fontNameIcon);
                         if ($boundaries[2] + $offsetX <= $areaSize->getWidth()) {
-                            $this->addText($area, $icon, $offsetX, $iconY, $fontSizeIcon, $this->color($this->textColorLabel, $alpha), $this->fontNameIcon);
+                            $this->addText(
+                                $area, $icon, $offsetX, $iconY, $fontSizeIcon,
+                                $this->color($iconColor, $alpha), $this->fontNameIcon
+                            );
                             $offsetX += $boundaries[2] + $labelSpace;
                         }
                     }
@@ -508,7 +525,9 @@ class Layout
                     if ($label) {
                         $boundaries = $this->textBoundaries($label);
                         if ($boundaries[2] + $offsetX <= $areaSize->getWidth()) {
-                            $this->addText($area, $label, $offsetX, $y, null, $this->color($this->textColorLabel, $alpha));
+                            $this->addText(
+                                $area, $label, $offsetX, $y, null, $this->color($labelColor, $alpha)
+                            );
                             $offsetX += $boundaries[2] + $labelSpace;
                         }
                     }
@@ -541,17 +560,21 @@ class Layout
             return;
         }
 
+        // TODO: settings
         $borderSize = isset($items[0]['color']) ? 1 : 0;
         $margin = 2;
 
-        $itemHeight = min(42, (int)(($area->getSize()->getHeight() - ($margin * 1.5) * ($rows + 1)) / $rows));
+        $itemHeight = min(42, (int)(($area->getSize()->getHeight() - $margin * ($rows + 1)) / $rows));
+
         $testImageSize = $this->imagine->open($items[0]['image'])->getSize();
+
         $testAspect = $testImageSize->getWidth() / $testImageSize->getHeight();
-        $itemWidth = $itemHeight * $testAspect;
+        $itemWidth = ceil($itemHeight * $testAspect);
 
-        $imageHeight = $itemHeight - $borderSize * 2;
+        //$imageHeight = ceil($itemHeight - $borderSize * 2);
+        $size = new Box($itemWidth - $borderSize * 2 + 1, $itemHeight - $borderSize * 2 + 1);
 
-        $trimWidth = $itemHeight;
+        $trimWidth = $itemWidth;
         $trimHeight = $itemHeight;
         $offsetX = 0;
         $offsetY = 0;
@@ -572,17 +595,17 @@ class Layout
             if (isset($item->color)) {
                 $area->draw()->polygon(
                     [new Point($offsetX, $offsetY),
-                     new Point($offsetX + $itemWidth - 1, $offsetY),
-                     new Point($offsetX + $itemWidth - 1, $offsetY - 1 + $itemHeight),
-                     new Point($offsetX, $offsetY - 1 + $itemHeight)],
-                    $this->color($item->color, 60), true
+                     new Point($offsetX + $itemWidth, $offsetY),
+                     new Point($offsetX + $itemWidth, $offsetY + $itemHeight),
+                     new Point($offsetX, $offsetY + $itemHeight)],
+                    $this->color($item->color, 70), true
                 );
             }
 
-            $this->addImage($area, $item->image, $offsetX + $borderSize, $offsetY + $borderSize, $imageHeight);
+            $this->addImage($area, $item->image, $offsetX + $borderSize, $offsetY + $borderSize, $size);
             $offsetX += $itemWidth + $margin;
         }
 
-        $area->crop(new Point(0, 0), new Box($trimWidth, $trimHeight));
+        $area->crop(new Point(0, 0), new Box($trimWidth + $borderSize, $trimHeight + $borderSize));
     }
 }
