@@ -36,6 +36,7 @@ class Layout
     protected $textColor;
     protected $textColorLabel;
     protected $textColorIcon;
+
     protected $textShadow;
     protected $labelSpace;
 
@@ -95,8 +96,9 @@ class Layout
         $this->textColor = $this->option('text.color', '#FFFFFF');
         $this->textColorLabel = $this->option('text.labelColor', '#CCCCCC');
         $this->textColorIcon = $this->option('text.iconColor', '#CCCCCC');
-        $this->labelSpace = max(0, (int)$this->option('text.labelSpace', 4));
+
         $this->textShadow = $this->option('text.shadow', true);
+        $this->labelSpace = max(0, (int)$this->option('text.labelSpace', 4));
 
         $this->fontName = $this->option('text.font', 'fontawesome-webfont.ttf');
         $this->fontSize = max(0, (int)$this->option('text.size', 8));
