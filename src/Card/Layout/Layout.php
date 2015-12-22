@@ -27,6 +27,9 @@ class Layout
 
     protected $backgroundColor;
     protected $backgroundAlpha;
+    protected $backgroundSize;
+    protected $backgroundAlign;
+    protected $backgroundVertical;
 
     protected $gridItemBorderSize;
     protected $gridItemBorderColor;
@@ -87,6 +90,9 @@ class Layout
 
         $this->backgroundColor = $this->option('background.color', '#000000');
         $this->backgroundAlpha = max(0, min(100, (int)$this->option('background.alpha', 100)));
+        $this->backgroundSize = $this->option('background.size', 'cover');
+        $this->backgroundAlign = $this->option('background.align', 'left');
+        $this->backgroundVertical = $this->option('background.vertical', 'center');
 
         $this->gridItemBorderSize = $this->option('gridItem.borderSize', 1);
         $this->gridItemBorderColor = $this->option('gridItem.borderColor', '#000000');
@@ -304,10 +310,6 @@ class Layout
             return;
         }
 
-        $resizeMode = $this->option('background.size', 'cover'); // cover|contain
-        $align = $this->option('background.align');
-        $verticalAlign = $this->option('background.vertical');
-
         $image = $this->imagine->open($imageUrl);
         $imageSize = $image->getSize();
         $imageAspect = $imageSize->getWidth() / $imageSize->getHeight();
@@ -319,7 +321,7 @@ class Layout
         $position = new Point(0, 0);
 
         // crop if resize mode is cover
-        if ($resizeMode == 'cover') {
+        if ($this->backgroundSize == 'cover') {
 
             if ($imageAspect <= $cardAspect) {
                 // resize to max width => align the image vertically
@@ -336,7 +338,7 @@ class Layout
             $position = new Point(0, 0);
 
             if ($imageAspect <= $cardAspect) {
-                switch ($verticalAlign) {
+                switch ($this->backgroundVertical) {
                     case 'bottom':
                         $image->crop(new Point(0, (int)(($imageSize->getHeight() - $this->height))), $cardSize);
                         break;
@@ -356,7 +358,7 @@ class Layout
                         break;
                 }
             } else {
-                switch ($align) {
+                switch ($this->backgroundAlign) {
                     case 'right':
                         $image->crop(new Point($imageSize->getWidth() - $this->width, 0), $cardSize);
                         break;
@@ -372,7 +374,7 @@ class Layout
             }
         }
 
-        if ($resizeMode == 'contain') {
+        if ($this->backgroundSize == 'contain') {
 
             if ($imageAspect <= $cardAspect) {
                 // resize to max height => align the image horizontally
@@ -389,7 +391,7 @@ class Layout
             $x = 0;
             $y = 0;
 
-            switch ($align) {
+            switch ($this->backgroundAlign) {
                 case 'center':
                     $x = (int)(($this->width - $imageSize->getWidth()) / 2);
                     break;
@@ -398,7 +400,7 @@ class Layout
                     break;
             }
 
-            switch ($verticalAlign) {
+            switch ($this->backgroundVertical) {
                 case 'center':
                     $y = (int)(($this->height - $imageSize->getHeight()) / 2);
                     break;

@@ -177,6 +177,9 @@ class Card
             if ($option === 'true') {
                 return true;
             }
+            if($option === '') {
+                return $default;
+            }
             return $option;
         }
     }
