@@ -1,6 +1,9 @@
 {
     "name": "completionist/vanity",
     "description": "Completionist Vanity Cards",
+    "homepage": "http://completionist.me/",
+    "repository": "https://github.com/completionist/vanity",
+    "license": "MIT",
     "type": "library",
     "keywords": [
         "completionist",
@@ -16,16 +19,12 @@
         "steam",
         "achievements"
     ],
-    "license": "MIT",
-    "homepage": "http://completionist.me/",
-    "repository": "https://github.com/completionist/vanity",
     "authors": [
         {
             "name": "luchaos",
             "email": "lcs@luchaos.at"
         }
     ],
-
     "require": {
         "php": ">=5.4.0",
         "imagine/imagine": "^0.6.3"
