@@ -1,10 +1,10 @@
 {
     "name": "completionist/vanity",
-
     "description": "Completionist Vanity Cards",
-
+    "homepage": "http://completionist.me/",
+    "repository": "https://github.com/completionist/vanity",
+    "license": "MIT",
     "type": "library",
-
     "keywords": [
         "completionist",
         "vanity",
@@ -19,28 +19,24 @@
         "steam",
         "achievements"
     ],
-
-    "license": "MIT",
-
-    "homepage": "http://completionist.me/",
-
     "authors": [
         {
             "name": "luchaos",
             "email": "lcs@luchaos.at"
         }
     ],
-
     "require": {
         "php": ">=5.4.0",
+        "ext-gd": "*",
         "imagine/imagine": "^0.6.3"
     },
-
     "autoload": {
         "psr-4": {
             "Completionist\\Vanity\\": "src/"
-        }
+        },
+        "files": [
+            "src/helpers.php"
+        ]
     },
-
     "minimum-stability": "stable"
 }
