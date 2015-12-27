@@ -27,12 +27,16 @@
     ],
     "require": {
         "php": ">=5.4.0",
+        "ext-gd": "*",
         "imagine/imagine": "^0.6.3"
     },
     "autoload": {
         "psr-4": {
             "Completionist\\Vanity\\": "src/"
-        }
+        },
+        "files": [
+            "src/helpers.php"
+        ]
     },
     "minimum-stability": "stable"
 }
