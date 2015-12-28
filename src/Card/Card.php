@@ -152,7 +152,7 @@ class Card
     {
         if (!is_null($this->data) && is_string($data)) {
             if (is_array($this->data)) {
-                return $this->resolveDotNotation($this->data, $data);
+                return array_get($this->data, $data);
             }
         } else {
             if (!empty($data)) {
@@ -170,7 +170,7 @@ class Card
     public function option($option, $default = null)
     {
         if (!empty($this->layoutOptions) && is_string($option)) {
-            $option = $this->resolveDotNotation($this->layoutOptions, $option, $default);
+            $option = array_get($this->layoutOptions, $option, $default);
             if ($option === 'false') {
                 return false;
             }
@@ -197,6 +197,9 @@ class Card
         $this->card()->show($this->format);
     }
 
+    /**
+     * @return string
+     */
     public function base64()
     {
         return base64_encode($this->card()->get($this->format));
@@ -262,25 +265,5 @@ class Card
         return $this->outputDirectory.'/'.$this->filename.($suffix ? '-'.$suffix : '').'.'.$this->format;
     }
 
-    /**
-     * Array dot notation accessor helper
-     *
-     * @param array $a
-     * @param       $path
-     * @param null  $default
-     * @return array|null
-     */
-    protected function resolveDotNotation(array $a, $path, $default = null)
-    {
-        $current = $a;
-        $p = strtok($path, '.');
-        while ($p !== false) {
-            if (!isset($current[$p])) {
-                return $default;
-            }
-            $current = $current[$p];
-            $p = strtok('.');
-        }
-        return $current;
-    }
+
 }
