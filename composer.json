@@ -32,7 +32,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Completionist\\Vanity\\": "src/"
+            "Completionist\\": "src/"
         },
         "files": [
             "src/helpers.php"

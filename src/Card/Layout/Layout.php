@@ -3,9 +3,9 @@
  * @author luchaos
  */
 
-namespace Completionist\Vanity\Card\Layout;
+namespace Completionist\Card\Layout;
 
-use Completionist\Vanity\Card\Card;
+use Completionist\Card\Card;
 use Exception;
 use Imagine\Gd\Image;
 use Imagine\Gd\Imagine;
