@@ -3,11 +3,10 @@
  * @author luchaos
  */
 
-namespace Completionist\Vanity\Card;
+namespace Completionist\Card;
 
-use Completionist\Vanity\Card\Layout\AStatsRetro;
-use Completionist\Vanity\Card\Layout\Classic;
-use Completionist\Vanity\Card\Layout\Layout;
+use Completionist\Card\Layout\Classic;
+use Completionist\Card\Layout\Layout;
 use Exception;
 use Imagine\Gd\Image;
 use Imagine\Gd\Imagine;

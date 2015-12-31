@@ -3,7 +3,7 @@
  * @author luchaos
  */
 
-namespace Completionist\Vanity\Card\Layout;
+namespace Completionist\Card\Layout;
 
 use Imagine\Gd\Image;
 use Imagine\Image\Box;
