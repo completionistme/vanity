@@ -56,8 +56,8 @@ class Card
      * @param string|null $format
      * @param bool|null   $addSuffix
      */
-    public function __construct($outputDirectory = null, $filename = null, $format = null, $addSuffix = null
-    ) {
+    public function __construct($outputDirectory = null, $filename = null, $format = null, $addSuffix = null)
+    {
         if (!is_null($outputDirectory)) {
             $this->outputDirectory($outputDirectory);
         }
@@ -120,7 +120,7 @@ class Card
      */
     public function layout($layout, $layoutOptions = null, $data = null)
     {
-        if (is_a($layout, 'Completionist\Vanity\Card\Layout\Layout')) {
+        if (is_a($layout, Layout::class)) {
             $this->layout = $layout;
             $this->layoutType = $layout->id();
         } else {
@@ -176,7 +176,7 @@ class Card
             if ($option === 'true') {
                 return true;
             }
-            if($option === '') {
+            if ($option === '') {
                 return $default;
             }
             return $option;
@@ -210,11 +210,11 @@ class Card
     private function validate()
     {
         if (empty($this->filename)) {
-            throw new Exception('Invalid filename: "'.$this->filename.'".');
+            throw new Exception('Invalid filename: "' . $this->filename . '".');
         }
 
         if (is_null($this->format) || !in_array($this->format, ['png', 'png'])) {
-            throw new Exception('Invalid format "'.$this->format.'". Use "png" or "jpg".');
+            throw new Exception('Invalid format "' . $this->format . '". Use "png" or "jpg".');
         }
 
         // TODO: validate directory is writable
@@ -261,7 +261,7 @@ class Card
      */
     private function imagePath($suffix = null)
     {
-        return $this->outputDirectory.'/'.$this->filename.($suffix ? '-'.$suffix : '').'.'.$this->format;
+        return $this->outputDirectory . '/' . $this->filename . ($suffix ? '-' . $suffix : '') . '.' . $this->format;
     }
 
 
